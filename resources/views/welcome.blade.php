@@ -26,7 +26,7 @@
                             <div class="collapse " id="collapseExample">
                                 <div class="card card-body btn-group-lg">
 
-                                    <form class="mb-3" action="/upload" method="post">
+                                    <form class="mb-3" action="/upload" method="post" enctype="multipart/form-data">
                                         @csrf
                                         <label for="uploadName"  class="form-label">Name the upload group (will be public)</label>
                                         <textarea class="form-control" id="uploadName" name="uploadName" rows="1"></textarea>
@@ -70,8 +70,8 @@
                                             <label for="exampleInputEmail1">Email address</label>
                                             <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email" placeholder="Enter email">
                                         </div>
-                                        <label for="files" class="form-label">Select file(s) for upload</label>
-                                        <input class="form-control" type="file" name="files" id="files" multiple>
+                                        <label for="file" class="form-label">Select file(s) for upload</label>
+                                        <input class="form-control" type="file" name="files[]" id="file" multiple>
 
                                         <button type="submit" class="btn btn-success btn-block">Submit</button>
                                     </form>
