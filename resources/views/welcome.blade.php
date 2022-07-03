@@ -46,11 +46,18 @@
 
 
 
+
                                         <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" name="encrypt" id="encrypt">
-                                        <label class="form-check-label" for="encrypt">
-                                            Encrypt the files
-                                        </label>
+                                            <input class="form-check-input" type="radio" name="encrypt" value="yes" id="radioYes" checked="checked">
+                                            <label class="form-check-label" for="radioYes">
+                                                Encrypt file with random password
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="encrypt" value="no" id="radioNo">
+                                            <label class="form-check-label" for="radioNo">
+                                                Don't encrypt file
+                                            </label>
                                         </div>
 
                                         <div class="form-check">
