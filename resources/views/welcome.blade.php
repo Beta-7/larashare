@@ -61,6 +61,9 @@
                                         </div>
 
                                         <div class="form-check">
+                                            <input class="form-control" name="password" type="text">
+                                        </div>
+                                        <div class="form-check">
                                             <input class="form-check-input" type="radio" name="sendMethod" data-parent="#collapseExample" data-toggle="collapse" data-target="#emailInput" value="link" id="radioLink" checked="checked">
                                             <label class="form-check-label" for="radioLink">
                                                 Send with a link

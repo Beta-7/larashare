@@ -21,6 +21,6 @@ Route::get('/blacklist', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
+Route::get('/fetchFile/{fileId}', '\App\Http\Controllers\FileController@fetchFile');
 Route::post('/upload', '\App\Http\Controllers\FileController@upload');
 Route::post('/blacklist', '\App\Http\Controllers\FileController@blacklist');
