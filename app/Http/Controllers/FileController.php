@@ -52,13 +52,6 @@ class FileController extends BaseController
 
     }
 
-//    1">1 day</option>
-//                                            <option value="2">2 days</option>
-//                                            <option value="3">3 days</option>
-//                                            <option value="5">5 days</option>
-//                                            <option value="10">10 days</option>
-//                                            <option value="14">14 days</option>
-//                                            <option value="delete"
 
     public function upload(Request  $request){
 
@@ -98,7 +91,6 @@ class FileController extends BaseController
         }
         else{
             $file->uploadUser="UPLOADED_BY_GUEST";
-
         }
         $file->uploadIp=$request->ip();
         switch($request->input('delete')){
@@ -116,12 +108,10 @@ class FileController extends BaseController
             case 14:
                 $file->deleteAt = now()->addDay($request->input('delete'))->timestamp;
                 break;
-
-
+                
         }
         $file->timesDownloaded=0;
         $file->fileId=uniqid();
-//        dd($file);
         $file->save();
         return "Succesfully uploaded file";
     }
