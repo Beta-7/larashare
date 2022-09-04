@@ -59,10 +59,8 @@
                                                 Don't encrypt file
                                             </label>
                                         </div>
-
-                                        <div class="form-check">
-                                            <input class="form-control" name="password" type="text">
-                                        </div>
+                                        <br/>
+                                        <br/>
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="sendMethod" data-parent="#collapseExample" data-toggle="collapse" data-target="#emailInput" value="link" id="radioLink" checked="checked">
                                             <label class="form-check-label" for="radioLink">
@@ -75,6 +73,8 @@
                                                 Send with email
                                             </label>
                                         </div>
+                                        <br/>
+                                        <br/>
 
                                         <div id="emailInput" class="collapse">
                                             <label for="exampleInputEmail1">Email address</label>

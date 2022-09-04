@@ -11,20 +11,27 @@
 
                         @if (Auth::user())
                             <div class="alert alert-success" role="alert">
-                                Welcome {{Auth::user()->name}}
+                                Welcome {{Auth::user()->name}} <br/>
+                                The purpose of the blacklist feature is to dissallow the upload of known copyrighted material.
+                                To use it all you need to do is upload your copyrighted materials. Afterwards the website will
+                                calculate the file's hash values and not save your files. The next time a file is uploaded
+                                with such a hash value it will be declined.
+
                             </div>
-                        @endif
-
-
                             <form class="mb-3" action="/blacklist" method="post" enctype="multipart/form-data">
                                 @csrf
                                 <label for="uploadName"  class="form-label">Reason for blacklist</label>
                                 <textarea class="form-control" id="uploadName" name="reason" rows="1"></textarea>
-
-                               <input class="form-control" type="file" name="files[]" id="file" multiple>
-
+                                <br/>
+                                <input class="form-control" type="file" name="files[]" id="file" multiple>
+                                <br/>
                                 <button type="submit" class="btn btn-success btn-block">Submit</button>
                             </form>
+
+                        @else
+                                <div>You have no permission to view this page.</div>
+                            @endif
+
 
 
 

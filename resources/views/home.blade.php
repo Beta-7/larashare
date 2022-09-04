@@ -14,7 +14,8 @@
                         </div>
                     @endif
 
-                    {{ __('You are logged in!') }}
+                    {{ __('You are logged in!') }} Click
+                    <a href="{{ route('uploadfile') }}">here</a> to upload a file.
                 </div>
             </div>
         </div>
