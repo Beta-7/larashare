@@ -2,8 +2,9 @@
 namespace App\Repositories\Implementation;
 
 use \App\Models\BlacklistedFile;
+use App\Repositories\IBlackListedFilesRepository;
 
-class BlackListedFilesRepository {
+class BlackListedFilesRepository implements IBlackListedFilesRepository{
 //    public function createBlacklistedFile($file){
 //
 //    }

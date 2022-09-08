@@ -31,8 +31,11 @@
 
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
+            <div class="container">                <a class="navbar-brand"  href="{{ url('/') }}">
+
+                <img src="/logo.png" style="width: 150px;"/>
+                </a>
+                <a class="navbar-brand" style="padding-left:50px" href="{{ url('/') }}">
                     Larashare
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -84,14 +87,14 @@
 
                             </li>
                         @endguest
-                        @if(true)
+                        @if(Auth::user()?->role == "admin")
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                 Admin
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ route('profile',['userId'=>Auth::user()->id]) }}">
+                                <a class="dropdown-item" href="{{ route('listUsers') }}">
                                     Users
                                 </a>
                                 <a class="dropdown-item" href="{{ route('listFiles') }}"
@@ -100,7 +103,7 @@
                                 </a>
                                 <a class="dropdown-item" href="{{ route('listBlackListedFiles') }}"
                                 >
-                                    Blacklisted files
+                                    List blacklisted files
                                 </a>
                                 <a class="dropdown-item" href="{{ route('addBlacklist') }}"
                                 >

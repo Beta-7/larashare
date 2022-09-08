@@ -1,8 +1,9 @@
 <?php
 namespace App\Repositories\Implementation;
 use App\Models\User;
+use App\Repositories\IUserRepository;
 
-class UserRepository{
+class UserRepository implements IUserRepository{
     function getUserByID($id){
         return User::where('id',$id)->firstOrFail();
     }

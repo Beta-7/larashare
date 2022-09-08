@@ -18,11 +18,12 @@
     }
     .profile-userpic img {
         float: none;
-        margin-left : 75 !important;
+        height: 250px;
+        width: 250px;
+        margin-left: 29px !important;
         text-align: center;
         margin: 0 auto;
-        width: 50%;
-        height: 50%;
+
         -webkit-border-radius: 50% !important;
         -moz-border-radius: 50% !important;
         border-radius: 50% !important;
@@ -134,34 +135,43 @@
                     <!-- END SIDEBAR USER TITLE -->
                     <!-- SIDEBAR BUTTONS -->
                     <div class="profile-userbuttons">
-                        <button type="button" class="btn btn-success btn-sm">Email</button>
-                        <button type="button" class="btn btn-danger btn-sm">Report</button>
+                        <a type="button" href="mailto:{{$email}}" class="btn btn-success btn-sm">Email</a>
+                        <a type="button" href="{{ route('reportUser',['reportId'=>$reportId]) }}" class="btn btn-danger btn-sm">Report</a>
                     </div>
+                    @if(isset($message))
+                        {{$message}}
+                    @endif
                     <!-- END SIDEBAR BUTTONS -->
                     <!-- SIDEBAR MENU -->
                     <div class="profile-usermenu">
+                        @if(Auth::user() && Auth::user()->role == "admin")
                         <ul class="nav">
                             <li class="active">
-                                <a href="#">
+                                <a href="{{route('changeRole', [
+                                    'userId' => $reportId,
+                                    'role' => 'admin'
+                                    ])}}">
                                     <i class="glyphicon glyphicon-home"></i>
-                                    Overview </a>
+                                    Make admin </a>
                             </li>
                             <li>
-                                <a href="#">
+                            <a href="{{route('changeRole', [
+                                    'userId' => $reportId,
+                                    'role' => 'user'
+                                    ])}}">
                                     <i class="glyphicon glyphicon-user"></i>
-                                    Account Settings </a>
+                                    Make user </a>
                             </li>
                             <li>
-                                <a href="#" target="_blank">
+                            <a href="{{route('changeRole', [
+                                    'userId' => $reportId,
+                                    'role' => 'moderator'
+                                    ])}}">
                                     <i class="glyphicon glyphicon-ok"></i>
-                                    Tasks </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    <i class="glyphicon glyphicon-flag"></i>
-                                    Help </a>
+                                    Make moderator </a>
                             </li>
                         </ul>
+                        @endif
                     </div>
                     <!-- END MENU -->
                 </div>
@@ -179,8 +189,6 @@
                         </tr>
                         </thead>
                         <tbody>
-{{--                           protected $fillable = ['updated_at','created_at','fileID','timesDownloaded','deleteAt', 'uploadUser', 'uploadIp','userName','fileName'];
---}}
                         @foreach($files as $file)
                             <tr>
                                 <td> {{$file->created_at}} </td>

@@ -21,7 +21,7 @@
                             <form class="mb-3" action="/blacklist" method="post" enctype="multipart/form-data">
                                 @csrf
                                 <label for="uploadName"  class="form-label">Reason for blacklist</label>
-                                <textarea class="form-control" id="uploadName" name="reason" rows="1"></textarea>
+                                <textarea class="form-control" id="uploadName" name="reason" required="true" rows="1"></textarea>
                                 <br/>
                                 <input class="form-control" type="file" name="files[]" id="file" multiple>
                                 <br/>

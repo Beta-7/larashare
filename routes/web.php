@@ -12,10 +12,17 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+          App::bind('App\Repositories\IFileRepository',
+          'App\Repositories\Implementation\FileRepository');
+          App::bind('App\Repositories\IBlackListedFilesRepository',
+          'App\Repositories\Implementation\BlackListedFilesRepository');
+          App::bind('App\Repositories\IUserRepository',
+          'App\Repositories\Implementation\UserRepository');  
+          App::bind('App\Repositories\IFileFragmentRepository',
+          'App\Repositories\Implementation\FileFragmentRepository');        
 
 Route::get('/', function () {
-    return view('home');
+    return view('uploadFile');
 });
 
 Auth::routes();
@@ -37,4 +44,9 @@ Route::post('/blacklist', '\App\Http\Controllers\BlackListedFileController@black
 Route::view('/blacklist', 'blacklist')->name('addBlackListForm');
 
 
-Route::get('/users', '\App\Http\Controllers\UserController@getUsers');
+Route::get('/users', '\App\Http\Controllers\UserController@getUsers')->name('listUsers');
+Route::get('/users/{userId}/role/{role}','\App\Http\Controllers\UserController@changeRole')->name('changeRole');
+
+Route::view('/error','error');
+
+Route::get('/report/{reportId}', '\App\Http\Controllers\UserController@reportUser')->name('reportUser');

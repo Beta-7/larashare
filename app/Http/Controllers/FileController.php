@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers;
-use App\Repositories\Implementation\BlackListedFilesRepository;
-use App\Repositories\Implementation\FileFragmentRepository;
+use App\Repositories\IBlackListedFilesRepository;
+use App\Repositories\IFileFragmentRepository;
 use Illuminate\Http\Request;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -13,19 +13,19 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use ZipArchive;
 use \App\Models\File;
-use App\Repositories\Implementation\FileRepository;
-use App\Repositories\Implementation\UserRepository;
+use App\Repositories\IFileRepository;
+use App\Repositories\IUserRepository;
 use Illuminate\Support\Facades\Auth;
 
 class FileController extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    private FileRepository $fileRepository;
-    private UserRepository $userRepository;
-    private BlackListedFilesRepository $blackListedFilesRepository;
-    private FileFragmentRepository $fileFragmentRepository;
-    function __construct(FileRepository $fileRepo, UserRepository $userRepo, BlackListedFilesRepository $blackListedFilesRepo, FileFragmentRepository $fileFragmentRepo)
+    private IFileRepository $fileRepository;
+    private IUserRepository $userRepository;
+    private IBlackListedFilesRepository $blackListedFilesRepository;
+    private IFileFragmentRepository $fileFragmentRepository;
+    function __construct(IFileRepository $fileRepo, IUserRepository $userRepo, IBlackListedFilesRepository $blackListedFilesRepo, IFileFragmentRepository $fileFragmentRepo)
     {
         $this->fileRepository = $fileRepo;
         $this->userRepository = $userRepo;
@@ -45,22 +45,18 @@ class FileController extends BaseController
     public function deleteFile($fileId)
     {
         if ($fileId == null) {
-            return response()->json([
-                'message' => 'You must enter a file Id.'
-            ], 422);
+            return view('error',['message'=>'You must enter a file Id.']);
         }
 
         $file = $this->fileRepository->findById($fileId);
         $user = $this->userRepository->getUserByEmail(Auth::user()->email);
         if($file->uploadUser != $user->email){
-            return response()->json([
-                'message'=> 'File does not exist.'
-            ],401);
+            return view('error',['message'=>'File does not exist.']);
+
         }
         if (!$file->exists()) {
-            return response()->json([
-                'message' => 'File does not exist.'
-            ], 404);
+            return view('error',['message'=>'File does not exist.']);
+
         }
         $this->fileRepository->delete($file);
         return response(200);
@@ -77,11 +73,13 @@ class FileController extends BaseController
     {
         $fileDB = $this->fileRepository->findByFileId($fileId);
         if (!$fileDB) {
-            return response('File not found', 404);
+            return view('error',['message'=>'File does not exist.']);
+
         }
 
         if ($fileDB->deleteAt < now()->timestamp && $fileDB->deleteAt != 0 && $fileDB->deleteAt != -1) {
-            return response('File not found', 404);
+            return view('error',['message'=>'File does not exist.']);
+
         }
         $resp = response()->download($fileDB->fileName, $fileDB->userName, ['Content-Type: application/octet-stream']);
         if ($fileDB->deleteAt == 0) {
@@ -96,7 +94,8 @@ class FileController extends BaseController
     {
         $fileDB = $this->fileRepository->findByFileId($fileId);
         if (!$fileDB->exists()) {
-            return response('File not found', 404);
+            return view('error',['message'=>'File does not exist.']);
+
         }
         return view('downloadFile',['fileName'=>$fileDB->userName, 'fileSize'=>"50Mb", 'fileId' =>$fileDB->fileID]);
     }
@@ -104,44 +103,52 @@ class FileController extends BaseController
     public function upload(Request  $request)
     {
         if (($request->file('files')) == null) {
-            return response()->json([
-                'message' => 'You must upload at least one file.'
-            ], 422);
+            return view('error',['message'=>'You must upload at least one file.']);
+
         }
+        $size = 0;
+        foreach ($request->file('files') as $fileFragment){
+           $size = $size +$fileFragment->getSize();
+        }
+        $size = $size / 1024 / 1024;
+        // if(Auth::user() && $size > 100){
+        //     return view('error',['message'=>'Logged in users can upload files up to 100Mb in size.']);
 
+        // }
+        // if (!Auth::user() && $size > 20){
+        //     return view('error',['message'=>'Guests can upload files up to 20 Mb in size.']);
 
-
+        // }
         $zip_file = tempnam("/tmp", uniqid());
         $zip = new ZipArchive();
-
         $file = new File();
         $file->fileName = $zip_file;
         $fileId = uniqid();
         $zip->open($zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         if ($request->input('encrypt') == "yes") {
-
+            
             $password = uniqid();
             $zip->setPassword($password);
         } else {
             $password = "";
         }
+        
 
         foreach ($request->file('files') as $fileFragment) {
             if ($this->blackListedFilesRepository->isBlacklisted($fileFragment)) {
-                return response()->json([
-                    'message' => 'You tried uploading a blacklisted file.',
-                    'filename' => $fileFragment->getClientOriginalName()
-                ], 422);
+                return view('error',['message'=>'You tried uploading a blacklisted file. '.$fileFragment->getClientOriginalName()]);
+
             }
 
             $this->fileFragmentRepository->createFragment($fileFragment, $fileId);
 
             $zip->addFile($fileFragment->getPathname(), $fileFragment->getClientOriginalName());
             if ($request->input('encrypt') == "yes") {
-                $zip->setEncryptionName($fileFragment->getClientOriginalName(), ZipArchive::EM_AES_256, 'test');
+                $zip->setEncryptionName($fileFragment->getClientOriginalName(), ZipArchive::EM_AES_256, $password);
             }
 
         }
+        
         $zip->close();
         $file->userName = $request->input('uploadName')??'upload' . ".zip";
         $file->uploadUser = Auth::user()->email??'UPLOADED_BY_GUEST';
@@ -151,10 +158,28 @@ class FileController extends BaseController
         $file->fileId = $fileId;
         $file->save();
 
-        return response()->json([
-            'message' => 'Succesfully uploaded file.',
-            'downloadLink' => 'http://localhost/fetchFile/' . $file->fileId,
-            'password' => $password
-        ], 201);
+        $userId=null;
+        if(!!Auth::user())
+        {
+            $userId = $this->userRepository->getUserByEmail(Auth::user()->email)->id;
+        }
+        if ($request->input('encrypt') == "yes") {
+            return view('downloadFile',[
+                'fileName'=>$file->userName,
+                'fileId'=>$file->fileId,
+                'password'=>$password,
+                'fileSize'=>'50MB',
+                'uploadUser' =>$file->uploadUser,
+                'uploadId'=> $userId
+            ]);
+        }
+        return view('downloadFile',[
+            'fileName'=>$file->userName,
+            'fileId'=>$file->fileId,
+            'fileSize'=>'50MB',
+            'uploadUser' =>$file->uploadUser,
+            'uploadId'=> $userId
+        ]);
+
     }
 }

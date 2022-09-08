@@ -2,8 +2,9 @@
 namespace App\Repositories\Implementation;
 
 use App\Models\FileFragment;
+use App\Repositories\IFileFragmentRepository;
 
-class FileFragmentRepository {
+class FileFragmentRepository implements IFileFragmentRepository{
     function createFragment($file, $fileID){
         $fileFragment =new FileFragment();
         $fileFragment->fileName = $file->getClientOriginalName();

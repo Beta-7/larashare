@@ -82,7 +82,7 @@
                                         </div>
                                         <label for="file" class="form-label">Select file(s) for upload</label>
                                         <input class="form-control" type="file" name="files[]" id="file" multiple>
-
+                                        <br/>
                                         <button type="submit" class="btn btn-success btn-block">Submit</button>
                                     </form>
 
