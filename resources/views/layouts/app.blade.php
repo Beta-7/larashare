@@ -90,7 +90,7 @@
                         @if(Auth::user()?->role == "admin")
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                Admin
+                                Admin panel
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -115,7 +115,28 @@
 
                         </li>
                             @endif
+                            @if(Auth::user()?->role == "moderator")
+                        <li class="nav-item dropdown">
+                            <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                Moderator panel
+                            </a>
 
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+
+                                <a class="dropdown-item" href="{{ route('listBlackListedFiles') }}"
+                                >
+                                    List blacklisted files
+                                </a>
+                                <a class="dropdown-item" href="{{ route('addBlacklist') }}"
+                                >
+                                    Blacklist files
+                                </a>
+
+                            </div>
+
+
+                        </li>
+                            @endif
                     </ul>
                 </div>
             </div>

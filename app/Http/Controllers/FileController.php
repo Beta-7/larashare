@@ -93,17 +93,35 @@ class FileController extends BaseController
     public function displayFile($fileId)
     {
         $fileDB = $this->fileRepository->findByFileId($fileId);
+        $user = $this->userRepository->getUserByEmail($fileDB->uploadUser);
         if (!$fileDB->exists()) {
             return view('error',['message'=>'File does not exist.']);
-
         }
-        return view('downloadFile',['fileName'=>$fileDB->userName, 'fileSize'=>"50Mb", 'fileId' =>$fileDB->fileID]);
+        if($user){
+            return view('downloadFile',[
+            'fileName'=>$fileDB->userName, 
+            'fileSize'=>"50Mb", 
+            'fileId' =>$fileDB->fileID,
+            'uploadUser'=>$user->email,
+            'uploadId'=>$user->id]);
+        }
+        else{
+            return view('downloadFile',[
+                'fileName'=>$fileDB->userName, 
+                'fileSize'=>"50Mb", 
+                'fileId' =>$fileDB->fileID]);
+        }
+        
     }
-
+    
     public function upload(Request  $request)
     {
+        
         if (($request->file('files')) == null) {
             return view('error',['message'=>'You must upload at least one file.']);
+        }
+        if($request->input('email')!=null && !Auth::user()){
+            return view('error',['message'=>'Emails can only be sent by logged in users.']);
 
         }
         $size = 0;
@@ -111,14 +129,14 @@ class FileController extends BaseController
            $size = $size +$fileFragment->getSize();
         }
         $size = $size / 1024 / 1024;
-        // if(Auth::user() && $size > 100){
-        //     return view('error',['message'=>'Logged in users can upload files up to 100Mb in size.']);
+         if(Auth::user() && $size > 100){
+             return view('error',['message'=>'Logged in users can upload files up to 100Mb in size.']);
 
-        // }
-        // if (!Auth::user() && $size > 20){
-        //     return view('error',['message'=>'Guests can upload files up to 20 Mb in size.']);
+         }
+         if (!Auth::user() && $size > 20){
+             return view('error',['message'=>'Guests can upload files up to 20 Mb in size.']);
 
-        // }
+         }
         $zip_file = tempnam("/tmp", uniqid());
         $zip = new ZipArchive();
         $file = new File();
@@ -137,7 +155,6 @@ class FileController extends BaseController
         foreach ($request->file('files') as $fileFragment) {
             if ($this->blackListedFilesRepository->isBlacklisted($fileFragment)) {
                 return view('error',['message'=>'You tried uploading a blacklisted file. '.$fileFragment->getClientOriginalName()]);
-
             }
 
             $this->fileFragmentRepository->createFragment($fileFragment, $fileId);
@@ -162,6 +179,15 @@ class FileController extends BaseController
         if(!!Auth::user())
         {
             $userId = $this->userRepository->getUserByEmail(Auth::user()->email)->id;
+        }
+        if($request->input('email')!=null){
+            $details = [
+                'sharedBy'=>$file->uploadUser,
+                'name'=>$file->userName,
+                'fileId'=>$fileId
+            ];
+            \Mail::to($request->input('email'))->send(new \App\Mail\DownloadShared($details));
+
         }
         if ($request->input('encrypt') == "yes") {
             return view('downloadFile',[

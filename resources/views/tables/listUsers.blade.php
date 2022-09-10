@@ -17,7 +17,7 @@
             <td>{{$user->email}}</td>
             <td>{{$user->created_at}}</td>
             <td>{{$user->role}}</td>
-            <td><a href="#">Delete user</a> | <a href="{{ route('profile',['userId'=>Auth::user()->id]) }}">Visit profile</a></td>
+            <td><a href="#">Delete user</a> | <a href="{{ route('profile',['userId'=>$user->id]) }}">Visit profile</a></td>
 
         </tr>
         @endforeach

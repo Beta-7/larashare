@@ -6,10 +6,15 @@ use App\Repositories\IFileFragmentRepository;
 
 class FileFragmentRepository implements IFileFragmentRepository{
     function createFragment($file, $fileID){
-        $fileFragment =new FileFragment();
+        $fileFragment = new FileFragment();
         $fileFragment->fileName = $file->getClientOriginalName();
-        $fileFragment->md5hash = md5_file($file->getPathname());;
+        $fileFragment->md5hash = md5_file($file->getPathname());
         $fileFragment->fileID = $fileID;
         $fileFragment->save();
+    }
+    function getByHash($hash){
+        $fragments = FileFragment::where('md5hash', $hash)->get();
+        return $fragments;
+        
     }
 }

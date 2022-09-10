@@ -3,15 +3,14 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ReportedUser extends Mailable
+class DownloadShared extends Mailable
 {
     use Queueable, SerializesModels;
-
     public $details;
-
     /**
      * Create a new message instance.
      *
@@ -29,7 +28,7 @@ class ReportedUser extends Mailable
      */
     public function build()
     {
-        return $this->subject('A user has been reported')
-            ->view('Emails.reportedUser');
+        return $this->subject('A user has shared a download with you')
+            ->view('Emails.sharedDownload');
     }
 }

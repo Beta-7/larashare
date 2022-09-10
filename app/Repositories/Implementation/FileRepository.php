@@ -61,6 +61,7 @@ class FileRepository implements IFileRepository{
         });
         return $files;
     }
+
     public function fileBelongsToUser($user, $file){
         $file = File::where([['uploadUser',$user->email],
                               ['id',$file->id]])->get();

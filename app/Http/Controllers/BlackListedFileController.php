@@ -5,12 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\BlacklistedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Repositories\Implementation\BlackListedFilesRepository;
+use App\Repositories\IBlackListedFilesRepository;
+use App\Repositories\IFileRepository;
+use App\Repositories\IFileFragmentRepository;
+
 class BlackListedFileController extends Controller
 {
-    private BlackListedFilesRepository $blacklistedfilesRepository;
-    public function __construct(BlackListedFilesRepository $blacklistedfilesRepo){
+    private IBlackListedFilesRepository $blacklistedfilesRepository;
+    private IFileRepository $fileRepository;
+    private IFileFragmentRepository $fileFragmentRepository;
+    public function __construct(IBlackListedFilesRepository $blacklistedfilesRepo, IFileRepository $fileRepo, IFileFragmentRepository $fileFragmentRepo){
     $this->blacklistedfilesRepository=$blacklistedfilesRepo;
+    $this->fileRepository = $fileRepo;
+    $this->fileFragmentRepository = $fileFragmentRepo;
     }
     public function blacklist(Request $request)
     {
@@ -27,11 +34,29 @@ class BlackListedFileController extends Controller
             $blacklistedFile->md5hash = md5_file($file->getPathname());
             $blacklistedFile->blacklistedBy = "dsa";
             $blacklistedFile->save();
+            $this->retroActiveBlacklist($blacklistedFile->md5hash, $request->input('reason'));
         }
-        return response()->json([
-            'message' => 'Blacklisted ' . count($request->file('files')) . ' files for ' . $request->input('reason')
-        ], 201);
+        return $this->getBlackListedFiles();
     }
+
+    private function retroActiveBlacklist($hash, $reason){
+        $fileFragments = $this->fileFragmentRepository->getByHash($hash);
+        foreach ($fileFragments as $fragment){
+            $file = $this->fileRepository->findByFileId($fragment->fileID);
+            if($file->uploadUser != "UPLOADED_BY_GUEST"){
+                $details = [
+                    'title'=>$file->userName,
+                    'reason'=>$reason
+                ];
+                \Mail::to($file->uploadUser)->send(new \App\Mail\DownloadRemoved($details));
+            }
+            $file->delete();            
+
+        }
+
+
+    }
+
     public function getBlackListedFiles(){
         if (!Auth::user() || !(Auth::user()->role == "moderator" || Auth::user()->role == "admin")) {
             return view('error',['message'=>'You don\'t have the rights to be here.']);
@@ -46,6 +71,6 @@ class BlackListedFileController extends Controller
         }
         $file = $this->blacklistedfilesRepository->getFileById($id);
         $this->blacklistedfilesRepository->deleteFile($file);
-        return view ('tables/listBlacklistedFiles');
+        return $this->getBlackListedFiles();
     }
 }
